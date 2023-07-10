@@ -27,7 +27,11 @@ async function getArrivals(id) {
 function getUserInput() {
 	// console.log("Please enter your location (stopid):");
 	// return readline.prompt();
-	return "NW5 1TL";
+	console.log("arrivalClick called by button");
+	const userInput = document.getElementById("userPostCodeInput");
+	const userPostcode = userInput.value;
+	console.log(userPostcode);
+	return userPostcode;
 }
 
 async function postcodeToLatLng(postcode) {
@@ -73,7 +77,7 @@ async function getNearestBusStops(latitude, longitude) {
 	});
 }
 
-async function busBoard() {
+async function getBusBoard() {
 	// User postcode conversion
 	const userPostcode = getUserInput();
 	const userLocation = await postcodeToLatLng(userPostcode);
@@ -102,4 +106,4 @@ async function busBoard() {
 	}
 }
 
-busBoard();
+// busBoard();
