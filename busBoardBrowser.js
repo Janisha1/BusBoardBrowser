@@ -99,8 +99,7 @@ async function getNearestBusStops(latitude, longitude) {
 }
 
 async function displayBusBoard(nearestBusStops) {
-	clearErrorMessages();
-
+	
 	const liveBusArrivals = document.getElementById("liveBusArrivals");
 	liveBusArrivals.innerHTML = "";
 
@@ -158,11 +157,27 @@ async function getJourneys(startPostcode, endPostcode) {
 }
 
 function displayJourneys(journeysData){
-	console.log("journeysData: ")
-	console.log(journeysData)
+//	console.log("journeysData: ")
+//	console.log(journeysData)
+	const journeyPlanner = document.getElementById("journeyPlanner");
+	journeyPlanner.innerHTML = "";
+
+	if (journeysData.length === 0) {
+	//	console.log("No Journeys Found for that Route");
+		const noJourneyMessage = document.createElement("h3");
+		noJourneyMessage.innerText = "No Journeys Found for that Route";
+		journeyPlanner.appendChild(noJourneyMessage);
+		return;
+	}
+
+	for (let i = 0; i < 3 && i < journeysData.length; i++) {
+		
+	}
 }
 
+
 async function getBusBoard() {
+	clearErrorMessages();
 	// User postcode conversion
 	//	const userPostcode = getUserInput();
 	const userPostcode = getUserInput("userPostCodeInput");
@@ -186,6 +201,7 @@ async function getBusBoard() {
 
 /* Plan a journey function */
 async function getJourneyPlanner() {
+	clearErrorMessages();
 	// get start from and end at locations
 	console.log("I'm in the journey planner function");
 	const startPostcode = getUserInput("journeyStartFrom");
