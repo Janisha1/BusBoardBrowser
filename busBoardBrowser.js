@@ -37,11 +37,9 @@ async function getArrivalsAtStopPoint(id) {
 	return arrivalsData;
 }
 
-function getUserInput() {
-	// console.log("Please enter your location (stopid):");
-	// return readline.prompt();
-	console.log("arrivalClick called by button");
-	const userInput = document.getElementById("userPostCodeInput");
+function getUserInput(userInputID) {
+
+	const userInput = document.getElementById(userInputID);
 	const userPostcode = userInput.value.toUpperCase();
 	console.log("postcode check result: " + checkValidPostcode(userPostcode));
 
@@ -139,7 +137,8 @@ async function displayBusBoard(nearestBusStops) {
 
 async function getBusBoard() {
 	// User postcode conversion
-	const userPostcode = getUserInput();
+//	const userPostcode = getUserInput();
+	const userPostcode = getUserInput("userPostCodeInput");
 
 	const userLocation = await postcodeToLatLng(userPostcode);
 	console.log(
@@ -154,4 +153,14 @@ async function getBusBoard() {
 
 	// Display the arrivals board
 	displayBusBoard(nearestBusStops);
+}
+
+/* Plan a journey function */
+async function getJourneyPlanner() {
+	// get start from and end at locations
+	console.log("I'm in the journey planner function");
+	const startPostcode = getUserInput("journeyStartFrom");
+	const endPostcode = getUserInput("endJourneyAt");
+	console.log(`${startPostcode} , end at ${endPostcode}`);
+
 }
