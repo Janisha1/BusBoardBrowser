@@ -38,7 +38,6 @@ async function getArrivalsAtStopPoint(id) {
 }
 
 function getUserInput(userInputID) {
-
 	const userInput = document.getElementById(userInputID);
 	const userPostcode = userInput.value.toUpperCase();
 	console.log("postcode check result: " + checkValidPostcode(userPostcode));
@@ -135,9 +134,37 @@ async function displayBusBoard(nearestBusStops) {
 	}
 }
 
+async function getJourneys(startPostcode, endPostcode) {
+	// fetch data
+	const getJourneyPlanData = await fetchData(
+		`https://api.tfl.gov.uk/Journey/JourneyResults/${startPostcode}/to/${endPostcode}`
+	);
+
+	// sort by time?
+	const journeys = getJourneyPlanData.journeys;
+	journeys.sort(
+		(journeyA, journeyB) => journeyA.duration - journeyB.duration
+	);
+
+	// Map for required data to display
+	return journeys.map((journey) => {
+		return {
+			startDateTime: journey.startDateTime,
+			duration: journey.duration,
+			arrivalDateTime: journey.arrivalDateTime,
+			legs: journey.legs,
+		};
+	});
+}
+
+function displayJourneys(journeysData){
+	console.log("journeysData: ")
+	console.log(journeysData)
+}
+
 async function getBusBoard() {
 	// User postcode conversion
-//	const userPostcode = getUserInput();
+	//	const userPostcode = getUserInput();
 	const userPostcode = getUserInput("userPostCodeInput");
 
 	const userLocation = await postcodeToLatLng(userPostcode);
@@ -155,6 +182,8 @@ async function getBusBoard() {
 	displayBusBoard(nearestBusStops);
 }
 
+
+
 /* Plan a journey function */
 async function getJourneyPlanner() {
 	// get start from and end at locations
@@ -163,4 +192,9 @@ async function getJourneyPlanner() {
 	const endPostcode = getUserInput("endJourneyAt");
 	console.log(`${startPostcode} , end at ${endPostcode}`);
 
+	// Make Journey Planner API call
+	const journeysData = await getJourneys(startPostcode, endPostcode);
+
+	// Display journey to User
+	displayJourneys(journeysData)
 }
