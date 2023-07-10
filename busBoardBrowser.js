@@ -41,8 +41,9 @@ function getUserInput(userInputID) {
 	const userInput = document.getElementById(userInputID);
 	const userPostcode = userInput.value.toUpperCase();
 	console.log("postcode check result: " + checkValidPostcode(userPostcode));
-
-	displayErrorMessage("Invalid Postcode. Please fix and resubmit");
+	if (!checkValidPostcode(userPostcode)) {
+		displayErrorMessage("Invalid Postcode. Please fix and resubmit");
+	}
 
 	return userPostcode;
 }
@@ -99,9 +100,8 @@ async function getNearestBusStops(latitude, longitude) {
 }
 
 async function displayBusBoard(nearestBusStops) {
-	
 	const liveBusArrivals = document.getElementById("liveBusArrivals");
-	liveBusArrivals.innerHTML = "";
+	// liveBusArrivals.innerHTML = "";
 
 	if (nearestBusStops.length === 0) {
 		console.log("No buses found near you. Start walking");
@@ -133,6 +133,11 @@ async function displayBusBoard(nearestBusStops) {
 	}
 }
 
+function clearBusBoard() {
+	const liveBusArrivals = document.getElementById("liveBusArrivals");
+	liveBusArrivals.innerHTML = "";
+}
+
 async function getJourneys(startPostcode, endPostcode) {
 	// fetch data
 	const getJourneyPlanData = await fetchData(
@@ -156,14 +161,11 @@ async function getJourneys(startPostcode, endPostcode) {
 	});
 }
 
-function displayJourneys(journeysData){
-//	console.log("journeysData: ")
-//	console.log(journeysData)
+function displayJourneys(journeysData) {
 	const journeyPlanner = document.getElementById("journeyPlanner");
-	journeyPlanner.innerHTML = "";
+	// journeyPlanner.innerHTML = "";
 
 	if (journeysData.length === 0) {
-	//	console.log("No Journeys Found for that Route");
 		const noJourneyMessage = document.createElement("h3");
 		noJourneyMessage.innerText = "No Journeys Found for that Route";
 		journeyPlanner.appendChild(noJourneyMessage);
@@ -171,13 +173,37 @@ function displayJourneys(journeysData){
 	}
 
 	for (let i = 0; i < 3 && i < journeysData.length; i++) {
-		
+		// Heading
+		const journeyHeading = document.createElement("h3");
+		journeyHeading.innerText = `Journey Option ${i + 1}`;
+		journeyPlanner.appendChild(journeyHeading);
+
+		const journeyData = journeysData[i];
+
+		// Journey Summary
+		const journeySummary = document.createElement("p");
+		journeySummary.innerHTML = `<p>Duration: ${journeyData.duration}</p><p>Start Time: ${journeyData.startDateTime}</p><p>End Time: ${journeyData.arrivalDateTime}</p>`;
+		journeyPlanner.appendChild(journeySummary);
+
+		// Legs
+		const journeyLegs = document.createElement("ul");
+		journeyData.legs.forEach((leg) => {
+			const legSummary = document.createElement("li");
+			legSummary.innerText = leg.instruction.summary;
+			journeyLegs.appendChild(legSummary);
+		});
+		journeyPlanner.appendChild(journeyLegs);
 	}
 }
 
+function clearDisplayedJourneys() {
+	const journeyPlanner = document.getElementById("journeyPlanner");
+	journeyPlanner.innerHTML = "";
+}
 
 async function getBusBoard() {
 	clearErrorMessages();
+	clearBusBoard();
 	// User postcode conversion
 	//	const userPostcode = getUserInput();
 	const userPostcode = getUserInput("userPostCodeInput");
@@ -197,11 +223,10 @@ async function getBusBoard() {
 	displayBusBoard(nearestBusStops);
 }
 
-
-
 /* Plan a journey function */
 async function getJourneyPlanner() {
 	clearErrorMessages();
+	clearDisplayedJourneys();
 	// get start from and end at locations
 	console.log("I'm in the journey planner function");
 	const startPostcode = getUserInput("journeyStartFrom");
@@ -212,5 +237,5 @@ async function getJourneyPlanner() {
 	const journeysData = await getJourneys(startPostcode, endPostcode);
 
 	// Display journey to User
-	displayJourneys(journeysData)
+	displayJourneys(journeysData);
 }
