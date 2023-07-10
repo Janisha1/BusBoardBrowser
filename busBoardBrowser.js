@@ -17,6 +17,19 @@ async function fetchData(url) {
 	}
 }
 
+function displayErrorMessage(errMessage) {
+	const errorBanner = document.getElementById("errorBanner");
+	errorBanner.innerHTML = "";
+	const errorMessage = document.createElement("p");
+	errorMessage.innerText = errMessage;
+	errorBanner.appendChild(errorMessage);
+}
+
+function clearErrorMessages() {
+	const errorBanner = document.getElementById("errorBanner");
+	errorBanner.innerHTML = "";
+}
+
 async function getArrivalsAtStopPoint(id) {
 	const arrivalsData = await fetchData(
 		`https://api.tfl.gov.uk/StopPoint/${id}/Arrivals`
@@ -29,9 +42,17 @@ function getUserInput() {
 	// return readline.prompt();
 	console.log("arrivalClick called by button");
 	const userInput = document.getElementById("userPostCodeInput");
-	const userPostcode = userInput.value;
-	console.log(userPostcode);
+	const userPostcode = userInput.value.toUpperCase();
+	console.log("postcode check result: " + checkValidPostcode(userPostcode));
+
+	displayErrorMessage("Invalid Postcode. Please fix and resubmit");
+
 	return userPostcode;
+}
+
+function checkValidPostcode(postcode) {
+	var regex = /^([A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z]{2})$/g;
+	return regex.test(postcode);
 }
 
 async function postcodeToLatLng(postcode) {
@@ -81,6 +102,8 @@ async function getNearestBusStops(latitude, longitude) {
 }
 
 async function displayBusBoard(nearestBusStops) {
+	clearErrorMessages();
+
 	const liveBusArrivals = document.getElementById("liveBusArrivals");
 	liveBusArrivals.innerHTML = "";
 
@@ -117,6 +140,7 @@ async function displayBusBoard(nearestBusStops) {
 async function getBusBoard() {
 	// User postcode conversion
 	const userPostcode = getUserInput();
+
 	const userLocation = await postcodeToLatLng(userPostcode);
 	console.log(
 		`\nuser location:\nlat: ${userLocation.latitude} , long: ${userLocation.longitude}\n`
@@ -130,7 +154,4 @@ async function getBusBoard() {
 
 	// Display the arrivals board
 	displayBusBoard(nearestBusStops);
-
 }
-
-// busBoard();
