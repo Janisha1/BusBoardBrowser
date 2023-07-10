@@ -17,7 +17,7 @@ async function fetchData(url) {
 	}
 }
 
-async function getArrivals(id) {
+async function getArrivalsAtStopPoint(id) {
 	const arrivalsData = await fetchData(
 		`https://api.tfl.gov.uk/StopPoint/${id}/Arrivals`
 	);
@@ -75,9 +75,43 @@ async function getNearestBusStops(latitude, longitude) {
 		return {
 			id: stopPoint.naptanId,
 			distance: stopPoint.distance,
-			stopName: stopPoint.commonName
+			stopName: stopPoint.commonName,
 		};
 	});
+}
+
+async function displayBusBoard(nearestBusStops) {
+	const liveBusArrivals = document.getElementById("liveBusArrivals");
+	liveBusArrivals.innerHTML = "";
+
+	if (nearestBusStops.length === 0) {
+		console.log("No buses found near you. Start walking");
+		const noBusesMessage = document.createElement("h3");
+		noBusesMessage.innerText = "No buses found near you. Start walking";
+		liveBusArrivals.appendChild(noBusesMessage);
+		return;
+	}
+
+	// Show the busBoard
+	for (let i = 0; i < 2 && i < nearestBusStops.length; i++) {
+		// Bus Stop Heading
+		const busStopName = nearestBusStops[i].stopName;
+		const busStopHeading = document.createElement("h3");
+		busStopHeading.innerText = busStopName;
+		liveBusArrivals.appendChild(busStopHeading);
+
+		// Bus Stop Arrivals
+		const arrivalsList = document.createElement("ul");
+		const arrivalsData = await getArrivalsAtStopPoint(
+			nearestBusStops[i].id
+		);
+		displayArrivals(
+			arrivalsData,
+			nearestBusStops[i].stopName,
+			arrivalsList
+		);
+		liveBusArrivals.appendChild(arrivalsList);
+	}
 }
 
 async function getBusBoard() {
@@ -94,21 +128,9 @@ async function getBusBoard() {
 		userLocation.longitude
 	);
 
-	// When no StopPoints
+	// Display the arrivals board
+	displayBusBoard(nearestBusStops);
 
-	if (nearestBusStops.length === 0) {
-		console.log("No buses found near you. Start walking");
-		return;
-	}
-
-	// Show the busBoard
-	const liveBusArrivals = document.getElementById("liveBusArrivals");
-	for (let i = 0; i < 2 && i < nearestBusStops.length; i++) {
-		const arrivalsList = document.createElement("ul");
-		const arrivalsData = await getArrivals(nearestBusStops[i].id);
-		displayArrivals(arrivalsData, nearestBusStops[i].stopName, arrivalsList);
-		liveBusArrivals.appendChild(arrivalsList);
-	}
 }
 
 // busBoard();
