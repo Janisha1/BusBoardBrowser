@@ -43,11 +43,14 @@ async function postcodeToLatLng(postcode) {
 	return { latitude, longitude };
 }
 
-async function displayArrivals(arrivals, stopName) {
+async function displayArrivals(arrivals, stopName, arrivalsList) {
 	const numOfArrivalsToDisplay = Math.min(arrivals.length, 5);
 	console.log(`Bus stops for a ${stopName}`);
 	for (let i = 0; i < numOfArrivalsToDisplay; i++) {
 		const arrival = arrivals[i];
+		const arrivalListItem = document.createElement("li");
+		arrivalListItem.innerText = `Bus ${arrival.lineId} arriving in ${arrival.timeToStation} seconds`;
+		arrivalsList.appendChild(arrivalListItem);
 		console.log(
 			`  Bus ${arrival.lineId} arriving in ${arrival.timeToStation} seconds`
 		);
@@ -85,7 +88,7 @@ async function getBusBoard() {
 		`\nuser location:\nlat: ${userLocation.latitude} , long: ${userLocation.longitude}\n`
 	);
 
-	// Find Neaerst StopPoints
+	// Find Nearest StopPoints
 	const nearestBusStops = await getNearestBusStops(
 		userLocation.latitude,
 		userLocation.longitude
@@ -99,10 +102,12 @@ async function getBusBoard() {
 	}
 
 	// Show the busBoard
-
+	const liveBusArrivals = document.getElementById("liveBusArrivals");
 	for (let i = 0; i < 2 && i < nearestBusStops.length; i++) {
+		const arrivalsList = document.createElement("ul");
 		const arrivalsData = await getArrivals(nearestBusStops[i].id);
-		displayArrivals(arrivalsData, nearestBusStops[i].stopName);
+		displayArrivals(arrivalsData, nearestBusStops[i].stopName, arrivalsList);
+		liveBusArrivals.appendChild(arrivalsList);
 	}
 }
 
