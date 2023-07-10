@@ -41,11 +41,12 @@ function getUserInput(userInputID) {
 	const userInput = document.getElementById(userInputID);
 	const userPostcode = userInput.value.toUpperCase();
 	console.log("postcode check result: " + checkValidPostcode(userPostcode));
-	if (!checkValidPostcode(userPostcode)) {
-		displayErrorMessage("Invalid Postcode. Please fix and resubmit");
-	}
+	const userPostcodeValid = checkValidPostcode(userPostcode);
+	// if (!checkValidPostcode(userPostcode)) {
+	// 	displayErrorMessage("Invalid Postcode. Please fix and resubmit");
+	// }
 
-	return userPostcode;
+	return { postcode: userPostcode, isValid: userPostcodeValid };
 }
 
 function checkValidPostcode(postcode) {
@@ -201,41 +202,59 @@ function clearDisplayedJourneys() {
 	journeyPlanner.innerHTML = "";
 }
 
-async function getBusBoard() {
+function clearDisplays(){
 	clearErrorMessages();
 	clearBusBoard();
+	clearDisplayedJourneys();
+}
+
+async function getBusBoard() {
+	clearDisplays();
 	// User postcode conversion
 	//	const userPostcode = getUserInput();
 	const userPostcode = getUserInput("userPostCodeInput");
 
-	const userLocation = await postcodeToLatLng(userPostcode);
-	console.log(
-		`\nuser location:\nlat: ${userLocation.latitude} , long: ${userLocation.longitude}\n`
-	);
+	if (userPostcode.isValid) {
+		const userLocation = await postcodeToLatLng(userPostcode.postcode);
+		console.log(
+			`\nuser location:\nlat: ${userLocation.latitude} , long: ${userLocation.longitude}\n`
+		);
 
-	// Find Nearest StopPoints
-	const nearestBusStops = await getNearestBusStops(
-		userLocation.latitude,
-		userLocation.longitude
-	);
+		// Find Nearest StopPoints
+		const nearestBusStops = await getNearestBusStops(
+			userLocation.latitude,
+			userLocation.longitude
+		);
 
-	// Display the arrivals board
-	displayBusBoard(nearestBusStops);
+		// Display the arrivals board
+		displayBusBoard(nearestBusStops);
+	} else {
+		displayErrorMessage(
+			"Invalid Postcode for BusBoard. Please fix and resubmit"
+		);
+	}
 }
 
 /* Plan a journey function */
 async function getJourneyPlanner() {
-	clearErrorMessages();
-	clearDisplayedJourneys();
+	clearDisplays();
+
 	// get start from and end at locations
-	console.log("I'm in the journey planner function");
+	// console.log("I'm in the journey planner function");
+
 	const startPostcode = getUserInput("journeyStartFrom");
 	const endPostcode = getUserInput("endJourneyAt");
-	console.log(`${startPostcode} , end at ${endPostcode}`);
+	// console.log(`${startPostcode} , end at ${endPostcode}`);
 
 	// Make Journey Planner API call
-	const journeysData = await getJourneys(startPostcode, endPostcode);
-
-	// Display journey to User
-	displayJourneys(journeysData);
+	if (startPostcode.isValid && endPostcode.isValid) {
+		const journeysData = await getJourneys(
+			startPostcode.postcode,
+			endPostcode.postcode
+		); 
+		// Display journey to User
+		displayJourneys(journeysData);
+	} else {
+		displayErrorMessage("Invalid postcode in requested journey");
+	}
 }
